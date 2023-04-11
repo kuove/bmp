@@ -1,109 +1,55 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <malloc.h>
-typedef unsigned long DWORD;
-typedef int BOOL;
-typedef unsigned char BYTE;
-typedef unsigned short WORD;
-typedef struct tagBITMAPINFOHEADER
-{
-    DWORD biSize;
-    long biWidth;
-    long biHeight;
-    WORD biPlanes;
-    WORD biBitCount;
-    DWORD biCompression;
-    DWORD biSizeImage;
-    long biXPelsPerMeter;
-    long biYPelsPerMeter;
-    DWORD biClrUsed;
-    DWORD biClrImportant;
-} BITMAPINFOHEADER;
-int ReadBmp(const char *szFileName);
-int GetDIBColor(int X, int Y, BYTE *r, BYTE *g, BYTE *b);
-BITMAPINFOHEADER bih;
-BYTE *Buffer = NULL;
-long LineByteWidth;
-int main(void)
-{
-    int x, y;
-    x = 149;
-    y = 180;
-    BYTE r, g, b;
-    int n;
-    char szfilename[255] = "D:\\work\\project\\bmp\\diablo3_pose_diffuse.bmp";
-    if (ReadBmp(szfilename) == 0)
-    {
-        printf("failure to read file %s", szfilename);
-        return 1;
-    }
-    printf("Width: %ld\n", bih.biWidth);
-    printf("Height: %ld\n", bih.biHeight);
-    printf("BitCount: %d\n\n", (int)bih.biBitCount);
-    while (1)
-    {
-        // printf("input the X:");
-        // scanf("%d", &x);
-        if (x < 0)
-            break;
-        // printf("input the Y:");
-        // scanf("%d", &y);
-        if (GetDIBColor(x, y, &r, &g, &b) == 1)
-            printf("(%d, %d): r:%d, g:%d, b:%d\n", x, y, r, g, b);
-        else
-            printf("input error.\n");
-    }
 
-    free(Buffer);
-    return 0;
-}
-int ReadBmp(const char *szFileName)
-{
-    FILE *file;
-    WORD bfh[7];
-    long dpixeladd;
-    if (NULL == (file = fopen(szFileName, "rb")))
-    {
-        return 0;
-    }
-    printf("%s\n", szFileName);
-    fread(&bfh, sizeof(WORD), 7, file);
-    if (bfh[0] != (WORD)(((WORD)'B') | ('M' << 8)))
-    {
-        fclose(file);
-        return 0;
-    }
-    fread(&bih, sizeof(BITMAPINFOHEADER), 1, file);
-    if (bih.biBitCount < 24)
-    {
-        fclose(file);
-        return 0;
-    }
-    dpixeladd = bih.biBitCount / 8;
-    LineByteWidth = bih.biWidth * (dpixeladd);
-    if ((LineByteWidth % 4) != 0)
-        LineByteWidth += 4 - (LineByteWidth % 4);
-    if ((Buffer = (BYTE *)malloc(sizeof(BYTE) * LineByteWidth * bih.biHeight)) != NULL)
-    {
-        fread(Buffer, LineByteWidth * bih.biHeight, 1, file);
-        fclose(file);
-        return 1;
-    }
-    fclose(file);
-    return 0;
-}
-int GetDIBColor(int X, int Y, BYTE *r, BYTE *g, BYTE *b)
-{
-    int dpixeladd;
-    BYTE *ptr;
-    if (X < 0 || X >= bih.biWidth || Y < 0 || Y >= bih.biHeight)
-    {
-        return 0;
-    }
-    dpixeladd = bih.biBitCount / 8;
-    ptr = Buffer + X * dpixeladd + (bih.biHeight - 1 - Y) * LineByteWidth;
-    *b = *ptr;
-    *g = *(ptr + 1);
-    *r = *(ptr + 2);
+typedef struct {
+  unsigned char b;
+  unsigned char g;
+  unsigned char r;
+} Pixel;
+
+int main() {
+  FILE* file = fopen("diablo3_pose_diffuse.bmp", "rb");
+  if (!file) {
+    printf("Could not open file\n");
     return 1;
+  }
+
+  // 读取文件头
+  unsigned char header[54];
+  fread(header, sizeof(unsigned char), 54, file);
+
+  // 获取像素偏移量
+  int pixel_offset = header[10] + (header[11] << 8) + (header[12] << 16) + (header[13] << 24);
+
+  // 读取图像数据
+  int width = header[18] + (header[19] << 8) + (header[20] << 16) + (header[21] << 24);
+  int height = header[22] + (header[23] << 8) + (header[24] << 16) + (header[25] << 24);
+  int row_size = width * 3;
+  if (row_size % 4 != 0) {
+    row_size += 4 - (row_size % 4);
+  }
+  int data_size = row_size * height;
+  unsigned char* data = (unsigned char*) malloc(data_size);
+  fseek(file, pixel_offset, SEEK_SET);
+  fread(data, sizeof(unsigned char), data_size, file);
+
+  // 计算像素偏移量
+  int row = 10; // 例如，要读取第 10 行
+  int col = 20; // 例如，要读取第 20 列
+  int pixel_index = row * width + col;
+  int pixel_offset_in_data = pixel_index * 3;
+
+  // 读取像素值
+  unsigned char b = data[pixel_offset_in_data];
+  unsigned char g = data[pixel_offset_in_data + 1];
+  unsigned char r = data[pixel_offset_in_data + 2];
+
+  printf("Pixel at row %d, col %d: R=%d, G=%d, B=%d\n", row, col, r, g, b);
+
+  fclose(file);
+  free(data);
+
+  return 0;
 }
+
