@@ -1,0 +1,1 @@
+D:\\work\\project\\bmp\\diablo3_pose_diffuse.bmp

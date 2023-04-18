@@ -29,7 +29,7 @@ int main(void)
 	int x, y;
 	BYTE r, g, b;
 	int n;
-	char szfilename[255] = "D:\\work\\project\\bmp\\diablo3_pose_diffuse.bmp";
+	char szfilename[255] = "diablo3_pose_diffuse.bmp";
 	if (ReadBmp(szfilename) == 0)
 	{
 		printf("failure to read file %s", szfilename);
