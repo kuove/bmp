@@ -35,8 +35,8 @@ int main() {
   fread(data, sizeof(unsigned char), data_size, file);
 
   // 计算像素偏移量
-  int row = 10; // 例如，要读取第 10 行
-  int col = 20; // 例如，要读取第 20 列
+  int row = 0; // 例如，要读取第 10 行
+  int col = 0; // 例如，要读取第 20 列
   int pixel_index = row * width + col;
   int pixel_offset_in_data = pixel_index * 3;
 
@@ -45,7 +45,9 @@ int main() {
   unsigned char g = data[pixel_offset_in_data + 1];
   unsigned char r = data[pixel_offset_in_data + 2];
 
-  printf("Pixel at row %d, col %d: R=%d, G=%d, B=%d\n", row, col, r, g, b);
+  unsigned int c = (r << 16) | (g << 8) | b;
+
+  printf("Pixel at row %d, col %d: R=%d, G=%d, B=%d, C=%x\n", row, col, r, g, b, c);
 
   fclose(file);
   free(data);

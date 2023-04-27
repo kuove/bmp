@@ -9,7 +9,7 @@ void printBytes(const void *ptr, size_t size) {
 }
 
 int main() {
-    float f = 15.0f;
+    float f = 3.0f;
     uint8_t *ptr = (uint8_t *) &f;
     for (int i = sizeof(float) - 1; i >= 0; i--) {
         printBytes(&ptr[i], 1);
