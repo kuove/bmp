@@ -1,6 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
-#include <malloc.h>
+#include <sys/malloc.h>
 typedef unsigned long DWORD;
 typedef int BOOL;
 typedef unsigned char BYTE;
